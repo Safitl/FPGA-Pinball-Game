@@ -1,73 +1,36 @@
 # Technion Pinball FPGA Game
 
-An FPGA-based pinball-style game implemented in SystemVerilog using Quartus.  
-The game is displayed on a VGA screen and controlled through keyboard input. It combines classic pinball mechanics with a Technion-themed scoring system: the player collects academic credit points by hitting faculty-themed objects and advances through academic years until completing the degree.
+A Technion-themed pinball game implemented on an FPGA using **SystemVerilog** and **Quartus BDF block diagrams**.
 
-## Project Overview
+The game combines VGA graphics, keyboard control, audio feedback, score tracking, lives, moving flippers, ball movement, collision logic, and win/loss game states. The theme is based on completing a degree at the Technion: the player collects academic credit points by hitting faculty-themed targets, and reaching 160 points represents completing the degree.
 
-This project was developed as a final project for the Electrical Engineering Lab 1A course at the Technion.
+---
 
-The game simulates a 2D pinball table with:
+## Project Summary
 
+This project was developed for the **Electrical Engineering Laboratory 1A** course at the Technion.
+
+The game includes:
+
+- VGA display output
+- Keyboard input
+- Audio output
+- A 2D pinball arena
 - A moving ball affected by gravity and collisions
 - Two user-controlled flippers
 - A dynamic ball-launching mechanism
-- Faculty-themed score objects
-- Multiple game stages with increasing difficulty
-- Lives, score tracking, win/lose conditions
-- VGA graphics and audio feedback
+- Faculty-themed score targets
+- Score and life display
+- Multiple game stages
+- Victory and failure screens
 
-The creative theme of the project is "finishing a degree at the Technion."  
-The player aims to collect 160 credit points. Every 40 points represent progress to the next academic year, and reaching 160 points results in victory.
+---
 
-## Main Features
+## Game Concept
 
-- **VGA-based 2D game display**
-  - Static game arena
-  - Faculty objects
-  - Ball, flippers, score, lives, and game-state indicators
+The player launches the ball into the arena and uses the left and right flippers to keep it in play. The objective is to hit faculty objects, gain points, and progress through academic years.
 
-- **Pinball physics**
-  - Ballistic ball movement
-  - Gravity effect
-  - Collision handling with borders, obstacles, flippers, and faculty objects
-
-- **Interactive flippers**
-  - Two angular flippers controlled by keyboard input
-  - Independent motion for left and right flippers
-  - Gradual angular movement while a key is pressed
-  - Automatic return after key release
-  - Shorter flippers in later stages to increase difficulty
-
-- **Dynamic shooting mechanism**
-  - Initial launch state
-  - Variable launch behavior
-  - Ball-launch path closure mechanism
-
-- **Game controller state machine**
-  - Manages all major game states
-  - Handles reset, shooting, stage transitions, victory, and failure
-  - Controls score and lives
-  - Triggers events for audio and visual modules
-
-- **Technion-themed scoring**
-  - Faculty objects act as special score targets
-  - Score values depend on the current academic year/stage
-  - Objects can move or change position after certain events
-
-- **Audio feedback**
-  - Different sounds for events such as collisions, launch, failure, and special hits
-
-- **End-game indicators**
-  - Visual indication for victory
-  - Visual indication for failure
-
-## Game Rules
-
-The player starts with a fixed number of lives and launches the ball into the pinball arena.  
-The goal is to keep the ball in play using the flippers and collect score by hitting the faculty objects.
-
-Progression:
+The game is won when the player reaches **160 points**, representing the number of credits needed to complete the degree.
 
 | Score Range | Game Stage |
 |---|---|
@@ -77,167 +40,281 @@ Progression:
 | 120-159 | Year 4 |
 | 160+ | Victory |
 
-A life is lost when the ball reaches the bottom of the screen.  
-If the player reaches 160 points before losing all lives, the game ends in victory.  
-If all lives are lost before reaching the target score, the game ends in failure.
+A life is lost when the ball reaches the bottom of the screen. If all lives are lost before reaching 160 points, the game ends in failure.
 
-## Controls
+---
 
-Keyboard input is used for user interaction.
+## Main Features
+
+### VGA Graphics
+
+The game is displayed on a VGA screen and includes a fixed 2D game arena, ball, flippers, faculty bitmap objects, score, lives, background graphics, and victory/failure logos.
+
+### Keyboard Control
+
+Keyboard input is used to control the game actions.
 
 | Action | Key |
 |---|---|
 | Left flipper | `4` |
 | Right flipper | `6` |
-| Launch ball | Add according to source code |
-| Reset game | Add according to source code |
+| Launch ball | Verify in source code |
+| Reset game | Verify in source code |
 
-> Note: update this table after checking the final key mapping in the restored Quartus project.
+### Ball and Collision Logic
 
-## System Architecture
+The ball moves through the arena according to the game logic and reacts to borders, flippers, faculty objects, obstacles, and bottom-screen fall detection.
 
-The project is built from multiple SystemVerilog modules connected through a top-level hierarchy.
+### Flipper System
 
-Main modules:
+The two flippers are controlled independently. Each flipper is drawn as a line with a fixed pivot point and a moving endpoint. When the player presses the relevant key, the endpoint moves gradually along a circular path, creating angular flipper motion. When the key is released, the flipper returns gradually to its default position.
 
-| Module | Role |
-|---|---|
-| `Game_Controller` / `controller_game` | Main game state machine. Controls stages, lives, score, collisions, victory, failure, reset, and event outputs. |
-| `BallControlBlock` | Computes ball position and motion according to keyboard input, collisions, gravity, and game-controller signals. |
-| `Block_Flipper` / `Flipper` | Generates and animates the two flippers. Uses geometric calculations to draw angular moving lines. |
-| `Audio_Controller` | Selects and triggers sounds according to game events. |
-| Faculty object modules | Draw faculty-themed objects and generate draw/collision requests. Some objects can move or change position. |
-| VGA / Object MUX | Combines drawing requests from all visible objects and sends the correct RGB output to the VGA controller. |
-| Shooting mechanism | Handles the initial ball launch and launch-channel behavior. |
-| Score and life display | Displays the current score and remaining lives. |
-| Win/Loss logo modules | Display visual indicators at the end of the game. |
+In later stages, the flippers become shorter to increase the game difficulty.
 
-## Game Controller State Machine
+### Game Controller
 
-The `controller_game` module is one of the central modules in the project.  
-It uses a finite-state machine with the following main states:
+The main game logic is implemented in `RTL/VGA/game_controller.sv`.
 
-- `Idle` - initial state, reset state, or state after losing a life
-- `Shooting` - ball launch and launch-speed loading
-- `Step1` - first academic year / first difficulty stage
-- `Step2` - second academic year / increased difficulty
-- `Step3` - third academic year
-- `Step4` - fourth academic year
-- `End_Game` - final victory or failure state
+The controller manages reset behavior, ball launch state, score updates, life updates, stage transitions, collision events, victory/failure conditions, and output signals to VGA, audio, and object modules.
 
-The controller receives collision signals, keyboard-related signals, score information, and ball-position events. It outputs control signals to the ball, VGA, audio, score, and visual-object modules.
+The controller is based on a finite-state machine with the following main states:
 
-## Flipper Module
+- `Idle`
+- `Shooting`
+- `Step1`
+- `Step2`
+- `Step3`
+- `Step4`
+- `End_Game`
 
-The flipper system is implemented using geometric drawing and motion logic.
+### Audio Feedback
 
-Each flipper is represented as a line with:
+The project includes audio modules that generate different sounds for game events such as launch, collisions, failure, and special hits.
 
-- A fixed pivot point
-- A moving endpoint
-- A predefined radius
-- A changing angle
-- A configurable thickness
+---
 
-When the user presses the relevant key, the moving endpoint is updated gradually along a circular path. This creates angular flipper motion around the pivot point. When the key is released, the endpoint gradually returns to its default position.
+## Repository Structure
 
-In later game stages, the flipper length is shortened to make the game more difficult.
-
-## Development and Debugging
-
-The project was developed in stages:
-
-1. Basic VGA and audio interface exploration
-2. MVP implementation with a ball, flippers, obstacles, movement, and basic collisions
-3. Full game integration with scoring, stages, audio, moving objects, win/loss behavior, and final hierarchy
-
-Signal Tap was used to inspect internal signals, including state transitions in the `controller_game` module. One checked scenario was the transition from Stage 1 to Stage 2 after hitting the Electrical Engineering faculty object and updating the score.
-
-## Resource Usage
-
-The final design had reasonable FPGA resource usage and compiled in under 10 minutes.  
-Most of the resource usage was attributed to:
-
-- The `controller_game` module, due to the large number of flip-flops and state/control logic
-- Bitmap-related modules that use large two-dimensional vectors
-
-Reported compilation time: approximately **6 minutes and 33 seconds**.
-
-## Suggested Repository Structure
-
-After restoring the Quartus archive, the repository can be organized as follows:
+The repository preserves the restored Quartus project structure. Some Quartus/IP files remain in the root directory because Quartus may reference them by relative path. Moving them into another folder may break the project.
 
 ```text
 .
 ├── README.md
-├── src/
-│   ├── game_controller/
-│   ├── ball/
-│   ├── flippers/
-│   ├── graphics/
-│   ├── audio/
-│   └── top/
-├── simulation/
-├── docs/
-│   ├── screenshots/
-│   └── final_report.pdf
-├── quartus/
-│   ├── project.qpf
-│   └── project.qsf
-└── .gitignore
+├── .gitignore
+├── Lab1Demo.qpf
+├── Lab1Demo.qsf
+├── WaveformGC.vwf
+├── WaveformGCSim.vwf
+│
+├── clock_divider.qip
+├── clock_divider.sip
+├── clock_divider.cmp
+├── audio_codec_controller.qxp
+├── X_loca.qip
+├── X_location.qip
+├── Y_location.qip
+├── Number_position.qip
+├── matrix_top_XY.qip
+│
+├── constraints/
+│   ├── pin.tcl
+│   └── DE10_Standard_Audio.sdc
+│
+├── RTL/
+│   ├── VGA/
+│   │   ├── Project_Top.bdf
+│   │   ├── TOP_VGA_DEMO_KBD.bdf
+│   │   ├── game_controller.sv
+│   │   ├── ScoreCalculator.sv
+│   │   ├── Audio_Controller.sv
+│   │   ├── Flipper_Block.bdf
+│   │   ├── Shooting_Block.bdf
+│   │   ├── Faculties_Block.bdf
+│   │   ├── Score_Block.bdf
+│   │   ├── Life_Block.bdf
+│   │   ├── Logos_Block.bdf
+│   │   ├── bitmap modules
+│   │   ├── object-drawing modules
+│   │   └── background modules
+│   │
+│   ├── AUDIO/
+│   │   ├── TOP_AUDIO.bdf
+│   │   ├── AUDIO.bdf
+│   │   ├── ToneDecoder.sv
+│   │   ├── SinTable.sv
+│   │   ├── addr_counter.sv
+│   │   └── prescaler.sv
+│   │
+│   ├── KEYBOARD/
+│   │   ├── KEYBOARD_INTERFACE.qxp
+│   │   ├── random.sv
+│   │   ├── simple_up_counter.sv
+│   │   └── HexSS.sv
+│   │
+│   └── Seg7/
+│       └── SEG7.sv
+│
+└── docs/
+    ├── final_report.pdf
+    └── screenshots/
 ```
 
-If the restored Quartus project already has a different structure, keep the original structure and only add documentation files such as `README.md`, screenshots, and `.gitignore`.
+---
+
+## Important Files
+
+| File / Folder | Description |
+|---|---|
+| `Lab1Demo.qpf` | Main Quartus project file. Open this file in Quartus. |
+| `Lab1Demo.qsf` | Quartus settings file, including project assignments. |
+| `RTL/VGA/Project_Top.bdf` | Main top-level block diagram of the FPGA design. |
+| `RTL/VGA/TOP_VGA_DEMO_KBD.bdf` | VGA and keyboard integration block. |
+| `RTL/VGA/game_controller.sv` | Main game-controller finite-state machine. |
+| `RTL/VGA/Flipper_Block.bdf` | Flipper subsystem. |
+| `RTL/VGA/Shooting_Block.bdf` | Ball-launching subsystem. |
+| `RTL/VGA/Faculties_Block.bdf` | Faculty target subsystem. |
+| `RTL/VGA/Score_Block.bdf` | Score display subsystem. |
+| `RTL/VGA/Life_Block.bdf` | Life display subsystem. |
+| `RTL/VGA/Logos_Block.bdf` | Victory and failure logo display subsystem. |
+| `RTL/AUDIO/` | Audio synthesis and event-sound logic. |
+| `RTL/KEYBOARD/` | Keyboard interface and helper logic. |
+| `constraints/` | Pin and timing constraints. |
+| `*.qip`, `*.qxp`, `*.sip`, `*.cmp` | Quartus/IP-related files required by the project. |
+| `WaveformGC.vwf`, `WaveformGCSim.vwf` | Simulation waveform files. |
+
+---
 
 ## How to Open the Project
 
 1. Install Intel Quartus Prime.
-2. Restore the `.qar` archive if needed.
-3. Open the restored `.qpf` project file in Quartus.
-4. Compile the project.
-5. Connect the FPGA board to:
-   - VGA display
-   - Keyboard input
-   - Audio output, if used
-6. Program the FPGA with the generated `.sof` file.
+2. Clone or download this repository.
+3. Open Quartus.
+4. Open the project file:
 
-## Notes for GitHub Upload
+```text
+Lab1Demo.qpf
+```
 
-Before uploading to GitHub, avoid committing generated build folders and temporary files.  
-Recommended files to include:
+5. Verify that all source files are detected.
+6. Compile the project.
+7. Program the FPGA board using the generated `.sof` file.
 
-- HDL source files: `.sv`, `.v`, `.vhd`
-- Quartus project files: `.qpf`, `.qsf`
-- Constraint files: `.sdc`
-- Required memory/bitmap files: `.mif`, `.hex`, if used
-- Documentation and screenshots
-- README file
+---
 
-Recommended files/folders to ignore:
+## GitHub Upload Notes
 
-```gitignore
+This repository intentionally keeps several Quartus-generated or IP-related files in the root directory because they may be required for the project to open correctly.
+
+Files that should be kept in the repository:
+
+```text
+*.sv
+*.bdf
+*.qpf
+*.qsf
+*.qip
+*.qxp
+*.sip
+*.cmp
+*.sdc
+*.tcl
+*.vwf
+```
+
+Generated build outputs should not be committed:
+
+```text
 db/
 incremental_db/
 output_files/
-simulation/
+*.sof
+*.pof
 *.rpt
 *.summary
 *.done
+*.qarlog
+```
+
+---
+
+## Suggested `.gitignore`
+
+```gitignore
+# Quartus generated databases
+db/
+incremental_db/
+greybox_tmp/
+.qsys_edit/
+
+# Quartus build/programming outputs
+output_files/
 *.sof
 *.pof
-*.jdi
+*.rbf
+*.jic
+*.rpd
+*.cdf
+
+# Reports and logs
+*.rpt
+*.summary
+*.smsg
+*.done
+*.pin
+*.sta.rpt
+*.fit.rpt
+*.asm.rpt
+*.map.rpt
+*.flow.rpt
 *.qarlog
+
+# Temporary / backup files
 *.bak
+*.orig
 *.tmp
+*.qws
+*.ddb
+*.eqn
+*.jdi
+
+# Editor / OS files
+.vscode/
+.DS_Store
+Thumbs.db
 ```
+
+---
+
+## Development Process
+
+The project was built in several stages:
+
+1. Learning and testing the VGA and audio interfaces.
+2. Building a minimal playable version with ball movement, flippers, obstacles, and collision behavior.
+3. Integrating score, lives, game stages, faculty objects, audio feedback, and end-game screens.
+4. Debugging the final hierarchy and validating state transitions.
+
+Signal Tap was used to inspect internal game-controller behavior, including transitions between game stages and score updates.
+
+---
+
+## Resource Usage
+
+The final design had reasonable FPGA resource usage and compiled in under 10 minutes. The reported compilation time was approximately **6 minutes and 33 seconds**.
+
+Most of the resources were used by the main game-controller logic, state machines, flip-flops, and large bitmap modules used for VGA graphics.
+
+---
 
 ## Authors
 
 - Safit Levy
 - Tal Oved
 
+---
+
 ## Acknowledgments
 
-Developed as part of Electrical Engineering Lab 1A, course 044157, at the Technion - Israel Institute of Technology.
+Developed as part of **Electrical Engineering Laboratory 1A**, course **044157**, at the Technion - Israel Institute of Technology.
 
 Instructor: Mohammed Naser

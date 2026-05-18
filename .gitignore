@@ -1,0 +1,41 @@
+# Quartus generated databases
+db/
+incremental_db/
+greybox_tmp/
+.qsys_edit/
+
+# Quartus build/programming outputs
+output_files/
+*.sof
+*.pof
+*.rbf
+*.jic
+*.rpd
+*.cdf
+
+# Reports and logs
+*.rpt
+*.summary
+*.smsg
+*.done
+*.pin
+*.sta.rpt
+*.fit.rpt
+*.asm.rpt
+*.map.rpt
+*.flow.rpt
+*.qarlog
+
+# Temporary / backup files
+*.bak
+*.orig
+*.tmp
+*.qws
+*.ddb
+*.eqn
+*.jdi
+
+# Editor / OS files
+.vscode/
+.DS_Store
+Thumbs.db
