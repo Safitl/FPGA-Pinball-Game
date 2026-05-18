@@ -167,22 +167,47 @@ Reported compilation time: approximately **6 minutes and 33 seconds**.
 
 ```text
 .
-├── README.md
-├── src/
-│   ├── game_controller/
-│   ├── ball/
-│   ├── flippers/
-│   ├── graphics/
-│   ├── audio/
-│   └── top/
-├── simulation/
-├── docs/
-│   ├── screenshots/
-│   └── final_report.pdf
-├── quartus/
-│   ├── project.qpf
-│   └── project.qsf
-└── .gitignore
+├── RTL/
+│   ├── VGA/
+│   │   ├── Project_Top.bdf
+│   │   ├── TOP_VGA_DEMO_KBD.bdf
+│   │   ├── game_controller.sv
+│   │   ├── ScoreCalculator.sv
+│   │   ├── Audio_Controller.sv
+│   │   ├── Flipper_Block.bdf
+│   │   ├── Shooting_Block.bdf
+│   │   ├── Faculties_Block.bdf
+│   │   ├── Score_Block.bdf
+│   │   ├── Life_Block.bdf
+│   │   ├── Logos_Block.bdf
+│   │   ├── bitmap modules
+│   │   ├── object-drawing modules
+│   │   └── background modules
+│   │
+│   ├── AUDIO/
+│   │   ├── TOP_AUDIO.bdf
+│   │   ├── AUDIO.bdf
+│   │   ├── ToneDecoder.sv
+│   │   ├── SinTable.sv
+│   │   ├── addr_counter.sv
+│   │   └── prescaler.sv
+│   │
+│   ├── KEYBOARD/
+│   │   ├── KEYBOARD_INTERFACE.qxp
+│   │   ├── random.sv
+│   │   ├── simple_up_counter.sv
+│   │   └── HexSS.sv
+│   │
+│   └── Seg7/
+│       └── SEG7.sv
+│
+├── constraints/
+│   ├── pin.tcl
+│   └── DE10_Standard_Audio.sdc
+│
+├── *.qip / *.qxp files
+├── Quartus project files
+└── README.md
 ```
 
 
