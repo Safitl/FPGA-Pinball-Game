@@ -163,9 +163,7 @@ Most of the resource usage was attributed to:
 
 Reported compilation time: approximately **6 minutes and 33 seconds**.
 
-## Suggested Repository Structure
-
-After restoring the Quartus archive, the repository can be organized as follows:
+## Repository Structure
 
 ```text
 .
@@ -187,7 +185,6 @@ After restoring the Quartus archive, the repository can be organized as follows:
 └── .gitignore
 ```
 
-If the restored Quartus project already has a different structure, keep the original structure and only add documentation files such as `README.md`, screenshots, and `.gitignore`.
 
 ## How to Open the Project
 
@@ -201,35 +198,6 @@ If the restored Quartus project already has a different structure, keep the orig
    - Audio output, if used
 6. Program the FPGA with the generated `.sof` file.
 
-## Notes for GitHub Upload
-
-Before uploading to GitHub, avoid committing generated build folders and temporary files.  
-Recommended files to include:
-
-- HDL source files: `.sv`, `.v`, `.vhd`
-- Quartus project files: `.qpf`, `.qsf`
-- Constraint files: `.sdc`
-- Required memory/bitmap files: `.mif`, `.hex`, if used
-- Documentation and screenshots
-- README file
-
-Recommended files/folders to ignore:
-
-```gitignore
-db/
-incremental_db/
-output_files/
-simulation/
-*.rpt
-*.summary
-*.done
-*.sof
-*.pof
-*.jdi
-*.qarlog
-*.bak
-*.tmp
-```
 
 ## Authors
 
